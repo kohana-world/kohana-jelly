@@ -47,7 +47,7 @@ class Jelly_Core_Validator_Callback
 	 * For consistency with the rest of the library it is recommended that
 	 * the name begin with a colon (:).
 	 *
-	 * @param   Validate $validate 
+	 * @param   Validation $validate
 	 * @return  mixed
 	 */
 	public function call(Validation $validate)
@@ -62,7 +62,7 @@ class Jelly_Core_Validator_Callback
 	/**
 	 * Returns a callback and parameter list with contexts replaced.
 	 *
-	 * @param   Validate  $validate 
+	 * @param   Validation  $validate
 	 * @return  array
 	 */
 	protected function _contextualize(Validation $validate)
@@ -93,7 +93,7 @@ class Jelly_Core_Validator_Callback
 	 * If $key is not a string or does not start with ':'
 	 * the key is simply returned.
 	 *
-	 * @param   Validate  $validate
+	 * @param   Validation  $validate
 	 * @param   mixed     $key 
 	 * @return  mixed
 	 */

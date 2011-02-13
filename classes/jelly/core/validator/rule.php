@@ -43,7 +43,7 @@ class Jelly_Core_Validator_Rule extends Jelly_Validator_Callback
 	 * 
 	 * For rules, an error is added to the validation array if FALSE is returned.
 	 *
-	 * @param   Validate $validate 
+	 * @param   Validation $validate
 	 * @return  mixed
 	 */
 	public function call(Validation $validate)

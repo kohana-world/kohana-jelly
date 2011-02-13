@@ -35,7 +35,7 @@ class Jelly_Core_Validator_Filter extends Jelly_Validator_Callback
 	 * 
 	 * For filters, the value returned replaces the value in the validation array.
 	 *
-	 * @param   Validate $validate 
+	 * @param   Validation $validate
 	 * @return  mixed
 	 */
 	public function call(Validation $validate)

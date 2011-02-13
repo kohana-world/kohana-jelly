@@ -262,7 +262,7 @@ abstract class Jelly_Core_Field
 	/**
 	 * Callback for validating that a field is unique.
 	 *
-	 * @param   Validate $data
+	 * @param   Validation $data
 	 * @param   string $field
 	 * @return  void
 	 */

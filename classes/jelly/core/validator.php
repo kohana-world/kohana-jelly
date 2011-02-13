@@ -324,7 +324,7 @@ abstract class Jelly_Core_Validator extends Validation
 			{
 				// Found a default message for this error
 			}
-			elseif ($message = Kohana::message('validate', $error))
+			elseif ($message = Kohana::message('validation', $error))
 			{
 				// Found a default message for this error
 			}
