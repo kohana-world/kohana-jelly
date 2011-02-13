@@ -491,7 +491,7 @@ abstract class Jelly_Core_Model
 		// Run validation
 		if ( ! $this->validate($key))
 		{
-			throw new Validate_Exception($this->validator());
+			throw new Validation_Exception($this->validator());
 		}
 
 		// These will be processed later

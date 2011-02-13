@@ -7,7 +7,7 @@
  * @see     Jelly_Model::validate
  * @package Jelly
  */
-abstract class Jelly_Core_Validator extends Validate
+abstract class Jelly_Core_Validator extends Validation
 {
 	/**
 	 * @var  array  Validators added to the array
@@ -221,7 +221,7 @@ abstract class Jelly_Core_Validator extends Validate
 					if ( ! isset($this->_required[TRUE]) AND ! isset($this->_required[$field]))
 					{
 						// It's not required, so if it's empty we skip all rules
-						if ( ! Validate::not_empty($this[$field]))
+						if ( ! Valid::not_empty($this[$field]))
 						{
 							continue;
 						}
@@ -402,28 +402,35 @@ abstract class Jelly_Core_Validator extends Validate
 			
 			$callback = $set[0];
 			$params   = isset($set[1]) ? $set[1] : NULL;
-			
-			// Are we supposed to convert this to a callback of this class?
-			if (is_string($callback) AND is_callable(array(get_class($this), $callback)))
+
+			$validators = array(get_class($this), 'Valid');
+
+			foreach($validators as $valid)
 			{
-				// Is the method one that marks the field as required?
-				if (in_array($callback, $this->_empty_rules))
+				// Are we supposed to convert this to a callback of this class?
+				if (is_string($callback) AND is_callable(array($valid, $callback)))
 				{
-					$this->_required[$field] = TRUE;
-				}
-				
-				// Test to see if the method is static or not
-				$method = new ReflectionMethod(get_class($this), $callback);
-				
-				if ($method->isStatic())
-				{
-					$callback = array(get_class($this), $callback);
-				}
-				else
-				{
-					$callback = array(':validate', $callback);
+					// Is the method one that marks the field as required?
+					if (in_array($callback, $this->_empty_rules))
+					{
+						$this->_required[$field] = TRUE;
+					}
+
+					// Test to see if the method is static or not
+					$method = new ReflectionMethod($valid, $callback);
+
+					if ($method->isStatic())
+					{
+						$callback = array($valid, $callback);
+					}
+					else
+					{
+						// will not work for Valid as its a static class
+						$callback = array(':validate', $callback);
+					}
 				}
 			}
+
 			
 			// Create an object out of the callback if it isn't already one
 			if ( ! $callback instanceof $class)
