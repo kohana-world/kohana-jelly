@@ -72,6 +72,11 @@ abstract class Jelly_Core_Field
 	public $allow_null = TRUE;
 
 	/**
+	 * @var  mixed   Format for displaying "beautiful" values
+	 */
+	public $pretty_format;
+
+	/**
 	* @var  array  {@link Jelly_Validator} filters for this field.
 	*              Filters are called whenever data is set on the field.
 	*/

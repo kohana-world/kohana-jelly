@@ -259,6 +259,73 @@ abstract class Jelly_Core_Model
 			return $this->_unmapped[$name];
 		}
 	}
+
+	public function format($name, $format = NULL)
+	{
+		if ($field = $this->_meta->field($name))
+		{
+			$value = $this->get($name);
+
+			if ($format === NULL)
+			{
+				$format = $field->pretty_format;
+			}
+
+			if (empty($value) OR empty($format))
+			{
+				// no formatting
+				return $value;
+			}
+
+			if ($field instanceof Jelly_Core_Field_Float)
+			{
+				// waiting for array($decimals, $dec_point, $thousands_sep)
+				// @link http://php.net/number_format
+				$params = array_merge(array($value), (array)$format);
+				if (count($params) == 3)
+				{
+					array_push($params, NULL);
+				}
+				elseif(count($params) > 4)
+				{
+					$params = array_slice($params, 0, 4);
+				}
+				return call_user_func_array('number_format', $params);
+			}
+			elseif ($field instanceof Jelly_Core_Field_Integer)
+			{
+				// only thousands separator available
+				// @link http://php.net/number_format
+				return number_format($value, 0, NULL, $format);
+			}
+			elseif ($field instanceof Jelly_Core_Field_Timestamp)
+			{
+				// timestamp format string needed
+				// @link http://php.net/date
+				return date($format, $value);
+			}
+			elseif ($field instanceof Jelly_Core_Field_String)
+			{
+				// sprintf can use a lot of arguments, so $format can be either a string or an array
+				// @link http://php.net/sprintf
+				if (is_array($format))
+				{
+					// assume its an array($format, $arg2, $arg3, ...)
+					$params = array_merge(array(array_shift($format), $value), $format);
+				}
+				else
+				{
+					$params = array($format, $value);
+				}
+
+				return call_user_func_array('sprintf', $params);
+			}
+			else
+			{
+				return $value;
+			}
+		}
+	}
 	
 	/**
 	 * Returns the original value of a field, before it was changed.
