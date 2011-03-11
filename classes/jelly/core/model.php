@@ -42,12 +42,12 @@ abstract class Jelly_Core_Model
 	 * @var  Jelly_Meta  A copy of this object's meta object
 	 */
 	protected $_meta = NULL;
-
+	
 	/**
 	 * @var  Jelly_Validator  A copy of this object's validator
 	 */
 	protected $_validator = NULL;
-
+	
 	/**
 	 * @var  Boolean  A flag that keeps track of whether or not the model is valid
 	 */
@@ -60,7 +60,7 @@ abstract class Jelly_Core_Model
 
 	/**
 	 * Constructor.
-	 *
+	 * 
 	 * A key can be passed to automatically load a model by its
 	 * unique key.
 	 *
@@ -71,7 +71,7 @@ abstract class Jelly_Core_Model
 		// Load the object's meta data for quick access
 		$this->_meta = Jelly::meta($this);
 
-		// Copy over the defaults into the original data.
+		// Copy over the defaults into the original data. 
 		$this->_original = $this->_meta->defaults();
 
 		// Have an id? Attempt to load it
@@ -80,7 +80,7 @@ abstract class Jelly_Core_Model
 			$result = Jelly::query($this, $key)
 			     ->as_object(FALSE)
 			     ->select();
-
+			
 			// Only load if a record is found
 			if ($result)
 			{
@@ -127,7 +127,7 @@ abstract class Jelly_Core_Model
 			{
 				$value = $this->get($name);
 			}
-
+			
 			// Auto-load relations
 			if ($value instanceof Jelly_Builder)
 			{
@@ -159,7 +159,7 @@ abstract class Jelly_Core_Model
 
 		$this->set($name, $value);
 	}
-
+	
 	/**
 	 * Passes unknown methods along to the behaviors.
 	 *
@@ -174,7 +174,7 @@ abstract class Jelly_Core_Model
 
 	/**
 	 * Returns true if $name is a field of the model or an unmapped column.
-	 *
+	 * 
 	 * This does not conform to the standard of returning FALSE if the
 	 * property is set but the value is NULL. Rather this acts more like
 	 * property_exists.
@@ -210,12 +210,12 @@ abstract class Jelly_Core_Model
 		// We can safely delete this no matter what
 		unset($this->_unmapped[$name]);
 	}
-
+	
 	/**
 	 * Returns a string representation of the model in the
 	 * form of `Model_Name (id)` or `Model_Name (NULL)` if
 	 * the model is not loaded.
-	 *
+	 * 
 	 * This is designed to be useful for debugging.
 	 *
 	 * @return  string
@@ -259,12 +259,12 @@ abstract class Jelly_Core_Model
 			return $this->_unmapped[$name];
 		}
 	}
-
+	
 	/**
 	 * Returns the original value of a field, before it was changed.
-	 *
-	 * This method—combined with get(), which first searches for changed
-	 * values—is useful for comparing changes that occurred on a model.
+	 * 
+	 * This method—combined with get(), which first searches for changed 
+	 * values—is useful for comparing changes that occurred on a model. 
 	 *
 	 * @param   string  The field's or alias name
 	 * @return  mixed
@@ -304,10 +304,10 @@ abstract class Jelly_Core_Model
 
 	/**
 	 * Sets the value of a field.
-	 *
+	 * 
 	 * You can pass an array of key => value pairs
 	 * to set multiple fields at the same time:
-	 *
+	 * 
 	 *    $model->set(array(
 	 *        'field1' => 'value',
 	 *        'field2' => 'value',
@@ -316,7 +316,7 @@ abstract class Jelly_Core_Model
 	 *
 	 * @param   string  $name
 	 * @param   string  $value
-	 * @return  Jelly_Model
+	 * @return  $this
 	 */
 	public function set($values, $value = NULL)
 	{
@@ -373,7 +373,7 @@ abstract class Jelly_Core_Model
 	 * since the model declares itself as saved and loaded after.
 	 *
 	 * @param   array    $values
-	 * @return  Jelly_Model
+	 * @return  $this
 	 */
 	public function load_values($values)
 	{
@@ -385,18 +385,18 @@ abstract class Jelly_Core_Model
 			// Key is coming from a with statement
 			if (substr($key, 0, 1) === ':')
 			{
-				// The field comes back as ':model:field',
+				// The field comes back as ':model:field', 
 				// but can have infinite :field parts
 				$targets = explode(':', ltrim($key, ':'), 2);
 
-				// Alias as it comes back in, which allows
+				// Alias as it comes back in, which allows 
 				// people to use with() with alaised field names
 				$relationship = $this->_meta->field(array_shift($targets), TRUE);
 
 				// Find the field we need to set the value as
 				$target = implode(':', $targets);
 
-				// If there is no ":" in the target, it is a
+				// If there is no ":" in the target, it is a 
 				// column, otherwise it's another with()
 				if (FALSE !== strpos($target, ':'))
 				{
@@ -425,17 +425,17 @@ abstract class Jelly_Core_Model
 
 	/**
 	 * Validates the current state of the model.
-	 *
+	 * 
 	 * If the model is loaded, only what has changed
 	 * will be validated. Otherwise, is passed all data—including
 	 * original data—will be validated.
-	 *
+	 * 
 	 * Otherwise, pass an array for data to validate whatever is
 	 * in the array.
-	 *
-	 * If nothing is in the data that is to be validated,
+	 * 
+	 * If nothing is in the data that is to be validated, 
 	 * validation will succeed.
-	 *
+	 * 
 	 * After validation has completed, any data passed will be set
 	 * back into the model to ensure anything that has been changed
 	 * by filters or callbacks is reflected in the model.
@@ -446,43 +446,43 @@ abstract class Jelly_Core_Model
 	public function validate()
 	{
 		$key = $this->_original[$this->_meta->primary_key()];
-
-		// Set our :key context, since we can't reliably determine
+		
+		// Set our :key context, since we can't reliably determine 
 		// if the model is loaded or not by $model->loaded()
 		$this->validator()->context('key', $key);
-
+		
 		// For loaded models, we're only checking what's changed, otherwise we check it all
 		$data = ($key) ? $this->_changed : $this->_changed + $this->_original;
-
+		
 		// Don't validate if there isn't anything
 		if ( ! $this->_valid AND ! empty($data))
 		{
 			$validator = $this->validator($data);
-
-			$this->_meta->events()->trigger('model.before_validate',
+			
+			$this->_meta->events()->trigger('model.before_validate', 
 				$this, array($validator));
-
+			
 			if ($validator->check())
 			{
 				$this->set($validator->as_array());
 				$this->_valid = TRUE;
 			}
-
-			$this->_meta->events()->trigger('model.after_validate',
+			
+			$this->_meta->events()->trigger('model.after_validate', 
 				$this, array($validator));
 		}
 		else
 		{
 			$this->_valid = TRUE;
 		}
-
+		
 		return $this->_valid;
 	}
 
 	/**
 	 * Creates or updates the current record.
 	 *
-	 * @return  Jelly_Model
+	 * @return  $this
 	 **/
 	public function save()
 	{
@@ -496,7 +496,7 @@ abstract class Jelly_Core_Model
 
 		// These will be processed later
 		$values = $saveable = array();
-
+		
 		// Trigger callbacks and ensure we should proceed
 		if (FALSE === $this->_meta->events()->trigger('model.before_save', $this))
 		{
@@ -522,7 +522,7 @@ abstract class Jelly_Core_Model
 				}
 				// Or if we're INSERTing and we need to set the defaults for the first time
 				else if ( ! $key AND ! $this->changed($field->name) AND ! $field->primary)
-				{
+				{	
 					$values[$field->name] = $field->default;
 				}
 			}
@@ -554,7 +554,7 @@ abstract class Jelly_Core_Model
 			// Gotta make sure to set this
 			$this->_changed[$this->_meta->primary_key()] = $id;
 		}
-
+		
 		// Re-set any saved values; they may have changed
 		foreach ($values as $column => $value)
 		{
@@ -573,7 +573,7 @@ abstract class Jelly_Core_Model
 		{
 			$this->_meta->field($field)->save($this, $value, (bool) $key);
 		}
-
+		
 		// Trigger post-save callback
 		$this->_meta->events()->trigger('model.after_save', $this);
 
@@ -594,10 +594,10 @@ abstract class Jelly_Core_Model
 		if ($this->_loaded)
 		{
 			$key = $this->_original[$this->_meta->primary_key()];
-
+			
 			// Trigger callbacks to ensure we proceed
 			$result = $this->_meta->events()->trigger('model.before_delete', $this);
-
+			
 			if ($result === NULL)
 			{
 				// Trigger field callbacks
@@ -605,59 +605,59 @@ abstract class Jelly_Core_Model
 				{
 					$field->delete($this, $key);
 				}
-
+				
 				$result = Jelly::query($this, $key)->delete();
 			}
 		}
-
+		
 		// Trigger the after-delete
 		$this->_meta->events()->trigger('model.after_delete', $this);
-
+		
 		// Clear the object so it appears deleted anyway
 		$this->clear();
 
 		return (boolean) $result;
 	}
-
+	
 	/**
 	 * Removes any changes made to a model.
 	 *
 	 * This method only works on loaded models.
-	 *
+	 * 
 	 * @return $this
 	 */
 	public function revert()
 	{
 		if ($this->_loaded)
 		{
-			$this->_loaded =
+			$this->_loaded = 
 			$this->_saved  = TRUE;
 
 			$this->_changed   =
 			$this->_retrieved = array();
 		}
-
+		
 		return $this;
 	}
 
 	/**
 	 * Sets a model to its original state, as if freshly instantiated
 	 *
-	 * @return  Jelly_Model
+	 * @return  $this
 	 */
 	public function clear()
 	{
 		$this->_valid  =
-		$this->_loaded =
+		$this->_loaded = 
 		$this->_saved  = FALSE;
-
-		$this->_with      =
+		
+		$this->_with      = 
 		$this->_changed   =
-		$this->_retrieved =
+		$this->_retrieved = 
 		$this->_unmapped  = array();
-
+		
 		$this->_original = $this->_meta->defaults();
-
+		
 		return $this;
 	}
 
@@ -697,7 +697,7 @@ abstract class Jelly_Core_Model
 	 *
 	 * @param   string  $name
 	 * @param   mixed   $models
-	 * @return  Jelly_Model
+	 * @return  $this
 	 */
 	public function add($name, $models)
 	{
@@ -709,13 +709,13 @@ abstract class Jelly_Core_Model
 	 *
 	 * @param   string  $name
 	 * @param   mixed   $models
-	 * @return  Jelly_Model
+	 * @return  $this
 	 */
 	public function remove($name, $models)
 	{
 		return $this->_change($name, $models, FALSE);
 	}
-
+	
 	/**
 	 * Returns whether or not the model is loaded
 	 *
@@ -735,10 +735,10 @@ abstract class Jelly_Core_Model
 	{
 		return $this->_saved;
 	}
-
+	
 	/**
 	 * Returns whether or not the particular $field has changed.
-	 *
+	 * 
 	 * If $field is NULL, the method returns whether or not any
 	 * data whatsoever was changed on the model.
 	 *
@@ -786,7 +786,7 @@ abstract class Jelly_Core_Model
 	{
 		return $this->_meta;
 	}
-
+	
 	/**
 	 * Returns a copy of the model's validator.
 	 *
@@ -796,29 +796,29 @@ abstract class Jelly_Core_Model
 	public function validator(array $data = NULL)
 	{
 		if ( ! $this->_validator)
-		{
+		{	
 			$this->_validator = $this->_meta->validator(array());
-
+			
 			// Give it $this as a model context
 			$this->_validator->context('model', $this);
 		}
-
+		
 		// Swap out the array if we need to
 		if ($data)
 		{
 			$this->_validator->exchangeArray($data);
 		}
-
+		
 		return $this->_validator;
 	}
-
+	
 	/**
 	 * Changes a relation by adding or removing specific records from the relation.
 	 *
 	 * @param   string  $name    The name of the field
 	 * @param   mixed   $models  Models or primary keys to add or remove
 	 * @param   string  $add     True to add, False to remove
-	 * @return  Jelly_Model
+	 * @return  $this
 	 */
 	protected function _change($name, $models, $add)
 	{

@@ -3,32 +3,32 @@
 /**
  * This core class is the main interface to all
  * models, builders, and meta data.
- *
+ * 
  * @package  Jelly
  */
 abstract class Jelly_Core
-{
+{	
 	/**
 	 * @var  string  The prefix to use for all model's class names
 	 *               This can be overridden to allow you to place
 	 *               models and builders in a different location.
 	 */
 	protected static $_model_prefix = 'model_';
-
+	
 	/**
 	 * @var  string  This prefix to use for all model's field classes
 	 *               This can be overridden to allow you to place
 	 *               field classes in a different location.
 	 */
 	protected static $_field_prefix = 'Jelly_Field_';
-
+	
 	/**
 	 * @var  string  This prefix to use for all behavior classes
 	 *               This can be overridden to allow you to place
 	 *               behavior classes in a different location.
 	 */
 	protected static $_behavior_prefix = 'Jelly_Behavior_';
-
+        
 	/**
 	 * @var  array  Contains all of the meta classes related to models
 	 */
@@ -50,7 +50,7 @@ abstract class Jelly_Core
 
 		return new $class($key);
 	}
-
+	
 	/**
 	 * Returns a query builder that can be used for querying.
 	 *
@@ -68,7 +68,7 @@ abstract class Jelly_Core
 	public static function query($model, $key = NULL)
 	{
 		$builder = 'Jelly_Builder';
-
+		
 		if ($meta = Jelly::meta($model))
 		{
 			if ($meta->builder())
@@ -79,7 +79,7 @@ abstract class Jelly_Core
 
 		return new $builder($model, $key);
 	}
-
+	
 	/**
 	 * Gets a particular set of metadata about a model. If the model
 	 * isn't registered, it will attempt to register it.
@@ -103,7 +103,7 @@ abstract class Jelly_Core
 
 		return Jelly::$_models[$model];
 	}
-
+	
 	/**
 	 * Factory for instantiating fields.
 	 *
@@ -114,10 +114,10 @@ abstract class Jelly_Core
 	public static function field($type, $options = NULL)
 	{
 		$field = Jelly::$_field_prefix.$type;
-
-		return new $field($options);
+                
+		return new $field($options);	
 	}
-
+	
 	/**
 	 * Factoring for instantiating behaviors.
 	 *
@@ -128,10 +128,10 @@ abstract class Jelly_Core
 	public static function behavior($type, $options = NULL)
 	{
 		$behavior = Jelly::$_behavior_prefix.$type;
-
+		
 		return new $behavior($options);
 	}
-
+	
 	/**
 	 * Automatically loads a model, if it exists,
 	 * into the meta table.
@@ -230,7 +230,7 @@ abstract class Jelly_Core
 	{
 		return Jelly::$_model_prefix;
 	}
-
+	
 	/**
 	 * Returns the prefix to use for all fields.
 	 *
@@ -240,7 +240,7 @@ abstract class Jelly_Core
 	{
 		return Jelly::$_field_prefix;
 	}
-
+	
 	/**
 	 * Returns the prefix to use for all behaviors.
 	 *
