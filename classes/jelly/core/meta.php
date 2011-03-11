@@ -42,12 +42,12 @@ abstract class Jelly_Core_Meta
 	 * @var  string  The foreign key for use in other tables. This can be referenced in query building as :foreign_key
 	 */
 	protected $_foreign_key = '';
-	
+
 	/**
 	 * @var  string  The polymorphic key for the model tree.
 	 */
 	protected $_polymorphic_key = NULL;
-	
+
 	/**
 	 * @var  array  An array of this model's children
 	 */
@@ -78,7 +78,7 @@ abstract class Jelly_Core_Meta
 	 *               Jelly_Builder_Modelname, if that particular class is found.
 	 */
 	protected $_builder = '';
-	
+
 	/**
 	 * @var  string  The validator attached to the object
 	 */
@@ -98,17 +98,17 @@ abstract class Jelly_Core_Meta
 	 * @var  array  A cache of retrieved fields, with aliases resolved
 	 */
 	protected $_field_cache = array();
-	
+
 	/**
 	 * @var  array  Events attached to this model
 	 */
 	protected $_events = array();
-	
+
 	/**
 	 * @var  array  Behaviors attached to this model
 	 */
 	protected $_behaviors = array();
-	
+
 	/**
 	 * @var  string  The parent model of this model
 	 */
@@ -118,16 +118,17 @@ abstract class Jelly_Core_Meta
 	 * This is called after initialization to
 	 * finalize any changes to the meta object.
 	 *
-	 * @return  void
+	 * @param  string $model
+	 * @return void
 	 */
 	public function finalize($model)
 	{
 		if ($this->_initialized)
 			return;
-			
+
 		// Set up event system
 		$this->_events = new Jelly_Event($model);
-		
+
 		// Initialize behaviors
 		foreach ($this->_behaviors as $name => $behavior)
 		{
@@ -136,7 +137,7 @@ abstract class Jelly_Core_Meta
 
 		// Allow modification of this meta object by the behaviors
 		$this->_events->trigger('meta.before_finalize', $this);
-		
+
 		// Ensure certain fields are not overridden
 		$this->_model       = $model;
 		$this->_columns     =
@@ -170,7 +171,7 @@ abstract class Jelly_Core_Meta
 		{
 			$this->_foreign_key = $model.'_id';
 		}
-		
+
 		// Initialize all of the fields with their column and the model name
 		foreach($this->_fields as $column => $field)
 		{
@@ -195,14 +196,14 @@ abstract class Jelly_Core_Meta
 			{
 				$this->_primary_key = $column;
 			}
-			
+
 			// Search for a polymorphic key
 			if ( ! empty($field->polymorphic))
 			{
 				$this->_polymorphic_key = $field->name;
-				
+
 				// Add this class as a child if it hasn't been added yet
-				if ( ! in_array($this->_model, $this->_children))	
+				if ( ! in_array($this->_model, $this->_children))
 				{
 					$this->_children[] = $this->_model;
 				}
@@ -214,11 +215,11 @@ abstract class Jelly_Core_Meta
 
 		// Meta object is initialized and no longer writable
 		$this->_initialized = TRUE;
-		
+
 		// Final meta callback
 		$this->_events->trigger('meta.after_finalize', $this);
 	}
-	
+
 	/**
 	 * Returns a string representation of the meta object.
 	 *
@@ -244,7 +245,7 @@ abstract class Jelly_Core_Meta
 	 *
 	 * @param   string  $key
 	 * @param   mixed   $value
-	 * @return  $this
+	 * @return  Jelly_Meta
 	 */
 	protected function set($key, $value)
 	{
@@ -259,7 +260,7 @@ abstract class Jelly_Core_Meta
 	/**
 	 * Gets or sets the db group
 	 * @param   string  $value
-	 * @return  string|$this
+	 * @return  string|void
 	 */
 	public function db($value = NULL)
 	{
@@ -283,7 +284,7 @@ abstract class Jelly_Core_Meta
 	/**
 	 * Gets or sets the table
 	 * @param   string  $value
-	 * @return  string|$this
+	 * @return  string|void
 	 */
 	public function table($value = NULL)
 	{
@@ -298,7 +299,7 @@ abstract class Jelly_Core_Meta
 	/**
 	 * Gets or sets the builder attached to this object
 	 * @param   string  $value
-	 * @return  string|$this
+	 * @return  string|void
 	 */
 	public function builder($value = NULL)
 	{
@@ -309,13 +310,14 @@ abstract class Jelly_Core_Meta
 
 		return $this->_builder;
 	}
-	
+
 	/**
 	 * Getter/setter for individual fields
-	 * 
-	 * @param   $name     string
-	 * @param   $type     string
-	 * @param   $options  mixed
+	 *
+	 * @param string $name
+	 * @param bool   $type
+	 * @param array  $options
+	 * @return array|Jelly_Core_Meta|null
 	 */
 	public function field($name, $type = FALSE, $options = array())
 	{
@@ -349,16 +351,16 @@ abstract class Jelly_Core_Meta
 			{
 				return $this->_field_cache[$name];
 			}
-			
+
 			return NULL;
 		}
-		
+
 		// If we've made it here it's a standard setter
 		if ( ! $this->_initialized)
 		{
 			// Allows fields to be appended
 			$this->_fields[$name] = Jelly::field($type, $options);
-			
+
 			return $this;
 		}
 	}
@@ -373,9 +375,9 @@ abstract class Jelly_Core_Meta
 	 * this multiple times while setting will append fields, not
 	 * overwrite fields.
 	 *
-	 * @param   $field  string
-	 * @param   $name   boolean
-	 * @return  array
+	 * @param null $field
+	 * @param bool $name
+	 * @return array|Jelly_Core_Meta
 	 */
 	public function fields($field = NULL, $name = FALSE)
 	{
@@ -401,7 +403,7 @@ abstract class Jelly_Core_Meta
 	 * If $name is specified, then the defaults
 	 * for that field are returned.
 	 *
-	 * @param   string  $name
+	 * @param   string|null  $name
 	 * @return  mixed
 	 */
 	public function defaults($name = NULL)
@@ -413,30 +415,29 @@ abstract class Jelly_Core_Meta
 
 		return $this->field($name)->default;
 	}
-	
+
 	/**
 	 * Gets the validator attached to the model.
-	 * 
-	 * @param   Jelly_Model $model 
-	 * @param   array       $data 
-	 * @param   boolean     $new 
+	 *
+	 * @param   array       $data
+	 * @param   boolean     $new
 	 * @return  Jelly_Validator
 	 */
 	public function validator(array $data, $new = FALSE)
 	{
 		// Allow returning an empty validator
-		if ($new) 
+		if ($new)
 		{
 			return new Jelly_Validator($data);
 		}
-		
+
 		// Create a default validator so we don't have to go through
 		// recreating all of the filters and such, which is an expensive process.
 		if ( ! $this->_validator)
 		{
 			// Create our default validator, which we will clone from
 			$this->_validator = new Jelly_Validator($data);
-			
+
 			// Add our filters, rules, and callbacks
 			foreach ($this->_fields as $name => $field)
 			{
@@ -446,16 +447,16 @@ abstract class Jelly_Core_Meta
 				$this->_validator->callbacks($name, $field->callbacks);
 			}
 		}
-		
+
 		// Return a copy to prevent mucking with the original validator
 		return $this->_validator->copy($data);
 	}
-	
+
 	/**
 	 * Gets or sets the behaviors attached to the object.
-	 * 
+	 *
 	 * @param   array  $value
-	 * @return  Jelly_Behavior|$this
+	 * @return  Jelly_Behavior|Jelly_Model
 	 */
 	public function behaviors($behaviors = NULL)
 	{
@@ -469,14 +470,14 @@ abstract class Jelly_Core_Meta
 			// Allows behaviors to be appended
 			$this->_behaviors += $behaviors;
 		}
-		
+
 		return $this;
 	}
-	
+
 	/**
 	 * Gets the events attached to the object.
-	 * 
-	 * @return  Jelly_Behavior|$this
+	 *
+	 * @return array
 	 */
 	public function events()
 	{
@@ -485,8 +486,9 @@ abstract class Jelly_Core_Meta
 
 	/**
 	 * Gets or sets the model's primary key.
-	 * @param   string  $value
-	 * @return  mixed
+	 *
+	 * @param  string|null $value
+	 * @return Jelly_Meta|string
 	 */
 	public function primary_key($value = NULL)
 	{
@@ -500,8 +502,9 @@ abstract class Jelly_Core_Meta
 
 	/**
 	 * Gets or sets the model's name key
-	 * @param   string  $value
-	 * @return  string
+	 *
+	 * @param  string|null $value
+	 * @return Jelly_Meta|string
 	 */
 	public function name_key($value = NULL)
 	{
@@ -515,8 +518,9 @@ abstract class Jelly_Core_Meta
 
 	/**
 	 * Gets or sets the model's foreign key
-	 * @param   string  $value
-	 * @return  string
+	 *
+	 * @param  string|null $value
+	 * @return Jelly_Meta|string
 	 */
 	public function foreign_key($value = NULL)
 	{
@@ -527,22 +531,23 @@ abstract class Jelly_Core_Meta
 
 		return $this->_foreign_key;
 	}
-	
+
 	/**
-	 * Gets the model's polymorphic key.
-	 * @param   string  $value
-	 * @return  string
+	 * Gets the model's polymorphic key
+	 *
+	 * @param  string|null $value
+	 * @return null|string
 	 */
 	public function polymorphic_key($value = NULL)
 	{
 		return $this->_polymorphic_key;
 	}
-	
+
 	/**
 	 * Gets the model's child models
 	 *
-	 * @param   array  $children 
-	 * @return  array
+	 * @param array $children
+	 * @return array|Jelly_Core_Meta
 	 */
 	public function children($children = array())
 	{
@@ -551,14 +556,15 @@ abstract class Jelly_Core_Meta
 			$this->_children += $children;
 			return $this;
 		}
-		
+
 		return $this->_children;
 	}
 
 	/**
 	 * Gets or sets the object's sorting properties
-	 * @param   array  $value
-	 * @return  array
+	 *
+	 * @param  string|null $value
+	 * @return array|Jelly_Meta
 	 */
 	public function sorting($value = NULL)
 	{
@@ -572,8 +578,9 @@ abstract class Jelly_Core_Meta
 
 	/**
 	 * Gets or sets the object's load_with properties
-	 * @param   array  $value
-	 * @return  array
+	 *
+	 * @param  string|null $value
+	 * @return array|Jelly_Meta
 	 */
 	public function load_with($value = NULL)
 	{

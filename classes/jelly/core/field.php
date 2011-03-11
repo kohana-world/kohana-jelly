@@ -15,7 +15,7 @@ abstract class Jelly_Core_Field
 	const WITH       = 'with';
 	const ADD_REMOVE = 'add_remove';
 	const JOIN       = 'join';
-	
+
 	/**
 	 * @var  string  The model's name
 	 */
@@ -60,12 +60,12 @@ abstract class Jelly_Core_Field
 	 * @var  boolean  Whether or not empty() values should be converted to NULL
 	 */
 	public $convert_empty = FALSE;
-	
+
 	/**
 	 * @var  mixed   The value to convert empty values to. This is only used if convert_empty is TRUE
 	 */
 	public $empty_value = NULL;
-	
+
 	/**
 	 * @var  boolean  Whether or not NULL values are allowed
 	 */
@@ -95,8 +95,9 @@ abstract class Jelly_Core_Field
 	/**
 	 * Sets all options
 	 *
-	 * @return  void
-	 **/
+	 * @param array $options
+	 * @return void
+	 */
 	public function __construct($options = array())
 	{
 		// Assume it's the column name
@@ -112,20 +113,20 @@ abstract class Jelly_Core_Field
 				$this->$name = $value;
 			}
 		}
-		
+
 		// See if we need to allow_null values because of convert_empty
 		if ($this->convert_empty AND $this->empty_value === NULL)
 		{
 			$this->allow_null = TRUE;
 		}
-		
+
 		// Default value is going to be NULL if null is true
 		// to mimic the SQL defaults
 		if ( ! array_key_exists('default', (array) $options) AND $this->allow_null)
 		{
 			$this->default = NULL;
 		}
-		
+
 		// Default the empty value to NULL when allow_null is TRUE, but be careful not
 		// to override a programmer-configured empty_value
 		if ( ! empty($options['allow_null']) AND ! array_key_exists('empty_value', (array) $options))
@@ -138,10 +139,10 @@ abstract class Jelly_Core_Field
 	 * This is called after construction so that fields can finish
 	 * constructing themselves with a copy of the column it represents.
 	 *
-	 * @param   string  $model
-	 * @param   string  $column
-	 * @return  void
-	 **/
+	 * @param string $model
+	 * @param string $column
+	 * @return void
+	 */
 	public function initialize($model, $column)
 	{
 		// This will come in handy for setting complex relationships
@@ -160,7 +161,7 @@ abstract class Jelly_Core_Field
 		{
 			$this->label = ucwords(inflector::humanize($column));
 		}
-		
+
 		// Check as to whether we need to add
 		// some callbacks for shortcut properties
 		if ($this->unique === TRUE)
@@ -173,13 +174,13 @@ abstract class Jelly_Core_Field
 	 * Sets a particular value processed according
 	 * to the class's standards.
 	 *
-	 * @param   mixed  $value
-	 * @return  mixed
-	 **/
+	 * @param  mixed $value
+	 * @return mixed
+	 */
 	public function set($value)
 	{
 		list($value, $return) = $this->_default($value);
-		
+
 		return $value;
 	}
 
@@ -211,15 +212,15 @@ abstract class Jelly_Core_Field
 	{
 		return $value;
 	}
-	
+
 	/**
 	 * Triggered whenever the model this field is attached to is deleted.
-	 * 
+	 *
 	 * This is useful for fields that need to implement some sort of
-	 * garbage collection. 
-	 * 
+	 * garbage collection.
+	 *
 	 * This method is called just before the actual record in the database
-	 * is deleted, and is not called at all if a model behavior stops 
+	 * is deleted, and is not called at all if a model behavior stops
 	 * the actual deletion of the record.
 	 *
 	 * @param   Jelly_Model  $model
@@ -230,18 +231,11 @@ abstract class Jelly_Core_Field
 	{
 		return;
 	}
-	
+
 	/**
-	 * Returns whether or not a field supports a particular feature.
-	 * 
-	 * This is abstracted away so Jelly_Model and Jelly_Builder don't
-	 * have to litter their code with instanceof checks and so we
-	 * can change the underlying implementation at will.
-	 * 
-	 * It is also easily overridable so custom fields can add their
-	 * own support for specific features if they want.
-	 * 
-	 * @param   string   The feature you're checking for support
+	 *
+	 *
+	 * @param   string $feature The feature you're checking for support
 	 * @return  boolean
 	 */
 	public function supports($feature)
@@ -259,10 +253,10 @@ abstract class Jelly_Core_Field
 			case Jelly_Field::JOIN:
 				return $this instanceof Jelly_Field_Supports_Join;
 		}
-		
+
 		return FALSE;
 	}
-	
+
 
 	/**
 	 * Callback for validating that a field is unique.
@@ -272,7 +266,7 @@ abstract class Jelly_Core_Field
 	 * @return  void
 	 */
 	public function _is_unique(Validation $data, Jelly_Model $model, $value, $key)
-	{	
+	{
 		// According to the SQL standard NULL is not checked by the unique constraint
 		if ($data[$this->name] !== NULL)
 		{
@@ -290,7 +284,7 @@ abstract class Jelly_Core_Field
 			}
 		}
 	}
-	
+
 	/**
 	 * Potentially converts the value to NULL or default depending on
 	 * the fields configuration. An array is returned with the first
@@ -298,27 +292,27 @@ abstract class Jelly_Core_Field
 	 * as to whether the field should return the value provided or
 	 * continue processing it.
 	 *
-	 * @param   mixed  $value 
+	 * @param   mixed  $value
 	 * @return  array
 	 */
 	protected function _default($value)
 	{
 		$return = FALSE;
-		
+
 		// Convert empty values to NULL, if needed
 		if ($this->convert_empty AND empty($value))
 		{
 			$value  = $this->empty_value;
 			$return = TRUE;
 		}
-		
+
 		// Allow NULL values to pass through untouched by the field
 		if ($this->allow_null AND $value === NULL)
 		{
 			$value  = NULL;
 			$return = TRUE;
 		}
-		
+
 		return array($value, $return);
 	}
 

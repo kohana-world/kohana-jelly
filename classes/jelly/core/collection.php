@@ -22,7 +22,7 @@ abstract class Jelly_Core_Collection implements Iterator, Countable, SeekableIte
 	 * @var  Jelly_Meta  The current meta object, based on the model we're returning
 	 */
 	protected $_meta = NULL;
-	
+
 	/**
 	 * @var  Jelly_Model  The current class we're placing results into
 	 */
@@ -32,16 +32,17 @@ abstract class Jelly_Core_Collection implements Iterator, Countable, SeekableIte
 	 * @var  mixed  The current result set
 	 */
 	protected $_result = NULL;
+
 	/**
 	 * Tracks a database result
 	 *
-	 * @param  mixed  $model
-	 * @param  mixed  $result
+	 * @param mixed $result
+	 * @param null $as_object
 	 */
 	public function __construct($result, $as_object = NULL)
 	{
 		$this->_result = $result;
-		
+
 		// Load our default model
 		if ($as_object AND Jelly::meta($as_object))
 		{
@@ -64,7 +65,7 @@ abstract class Jelly_Core_Collection implements Iterator, Countable, SeekableIte
 
 		return array_keys(get_object_vars($this));
 	}
-	
+
 	/**
 	 * Returns a string representation of the collection.
 	 *
@@ -74,7 +75,7 @@ abstract class Jelly_Core_Collection implements Iterator, Countable, SeekableIte
 	{
 		return get_class($this).': '.Jelly::model_name($this->_model).' ('.$this->count().')';
 	}
-	
+
 	/**
 	 * Returns the collection's meta object, if it exists.
 	 *
@@ -99,7 +100,7 @@ abstract class Jelly_Core_Collection implements Iterator, Countable, SeekableIte
 
 	/**
 	 * Implementation of the Iterator interface
-	 * @return  $this
+	 * @return  Jelly_Collection
 	 */
 	public function rewind()
 	{
@@ -109,7 +110,8 @@ abstract class Jelly_Core_Collection implements Iterator, Countable, SeekableIte
 
 	/**
 	 * Implementation of the Iterator interface
-	 * @return  Jelly
+	 *
+	 * @return  Jelly_Model
 	 */
     public function current()
 	{
@@ -138,7 +140,7 @@ abstract class Jelly_Core_Collection implements Iterator, Countable, SeekableIte
 
 	/**
 	 * Implementation of the Iterator interface
-	 * @return  $this
+	 * @return  Jelly_Collection
 	 */
 	public function next()
 	{
@@ -152,7 +154,7 @@ abstract class Jelly_Core_Collection implements Iterator, Countable, SeekableIte
 	 */
 	public function valid()
 	{
-		return $this->_result->valid();;
+		return $this->_result->valid();
 	}
 
 	/**
@@ -161,7 +163,7 @@ abstract class Jelly_Core_Collection implements Iterator, Countable, SeekableIte
 	 */
 	public function count()
 	{
-		return $this->_result->count();;
+		return $this->_result->count();
 	}
 
 	/**

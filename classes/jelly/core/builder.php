@@ -42,22 +42,22 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 	 * @var  array  Values to be INSERTed
 	 */
 	protected $_values = array();
-	
+
 	/**
 	 * @var  boolean  The result, if the query has been executed
 	 */
 	protected $_result = NULL;
-	
+
 	/**
 	 * @var  boolean  The type of the query, if provided
 	 */
 	protected $_type = NULL;
-	
+
 	/**
 	 * @var  array  Alias cache
 	 */
 	protected $_model_cache = array();
-	
+
 	/**
 	 * @var  array  Alias cache
 	 */
@@ -84,7 +84,7 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 		$this->_model = Jelly::model_name($model);
 		$this->_meta  = Jelly::meta($this->_model);
 		$this->_initialize();
-		
+
 		// Default to using our key
 		if ($key !== NULL)
 		{
@@ -105,7 +105,7 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 		{
 			return $this->_meta->events()->trigger('builder.call_'.$method, $this, $args);
 		}
-		
+
 		throw new Kohana_Exception('Invalid method :method called on class :class',
 			array(':method' => $method, ':class' => get_class($this)));
 	}
@@ -113,26 +113,26 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 	/**
 	 * Executes the query as a SELECT statement
 	 *
-	 * @param   string  $db 
+	 * @param   string  $db
 	 * @return  Jelly_Collection | Jelly_Model
 	 */
 	public function select($db = NULL)
 	{
 		$db   = $this->_db($db);
 		$meta = $this->_meta;
-		
+
 		if ($meta)
 		{
 			// Select all of the columns for the model if we haven't already
 			empty($this->_select) AND $this->select_column('*');
-			
+
 			// Trigger before_select callback
 			$meta->events()->trigger('builder.before_select', $this);
 		}
-		
+
 		// Ready to leave the builder, we need to figure out what type to return
 		$this->_result = $this->_build(Database::SELECT);
-		
+
 		// Return an actual array
 		if ($this->_as_object === FALSE OR Jelly::meta($this->_as_object))
 		{
@@ -142,10 +142,10 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 		{
 			$this->_result->as_object($this->_as_object);
 		}
-		
+
 		// Pass off to Jelly_Collection, which manages the result
 		$this->_result = new Jelly_Collection($this->_result->execute($db), $this->_as_object);
-		
+
 		// Trigger after_query callbacks
 		if ($meta)
 		{
@@ -158,60 +158,60 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 		{
 			$this->_result = $this->_result->current();
 		}
-		
+
 		return $this->_result;
 	}
-	
+
 	/**
 	 * Executes the query as an INSERT statement
 	 *
-	 * @param   string  $db 
+	 * @param   string  $db
 	 * @return  array
 	 */
 	public function insert($db = NULL)
 	{
 		$db   = $this->_db($db);
 		$meta = $this->_meta;
-		
+
 		// Trigger callbacks
 		$meta AND $meta->events()->trigger('builder.before_insert', $this);
-		
+
 		// Ready to leave the builder
 		$result = $this->_build(Database::INSERT)->execute($db);
-		
+
 		// Trigger after_query callbacks
 		$meta AND $meta->events()->trigger('builder.after_insert', $this);
-		
+
 		return $result;
 	}
-	
+
 	/**
 	 * Executes the query as an UPDATE statement
 	 *
-	 * @param   string  $db 
+	 * @param   string  $db
 	 * @return  int
 	 */
 	public function update($db = NULL)
 	{
 		$db   = $this->_db($db);
 		$meta = $this->_meta;
-		
+
 		// Trigger callbacks
 		$meta AND $meta->events()->trigger('builder.before_update', $this);
-		
+
 		// Ready to leave the builder
 		$result = $this->_build(Database::UPDATE)->execute($db);
-		
+
 		// Trigger after_query callbacks
 		$meta AND $meta->events()->trigger('builder.after_update', $this);
-			
+
 		return $result;
 	}
-	
+
 	/**
 	 * Executes the query as a DELETE statement
 	 *
-	 * @param   string  $db 
+	 * @param   string  $db
 	 * @return  int
 	 */
 	public function delete($db = NULL)
@@ -219,46 +219,46 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 		$db     = $this->_db($db);
 		$meta   = $this->_meta;
 		$result = NULL;
-		
+
 		// Trigger callbacks
 		if ($meta)
 		{
 			// Listen for a result to see if we need to actually delete the record
 			$result = $meta->events()->trigger('builder.before_delete', $this);
 		}
-		
+
 		if ($result === NULL)
 		{
 			$result = $this->_build(Database::DELETE)->execute($db);
 		}
-		
+
 		// Trigger after_query callbacks
 		if ($meta)
 		{
 			// Allow the events to modify the result
 			$result = $meta->events()->trigger('builder.after_delete', $this);
 		}
-		
+
 		return $result;
 	}
-	
+
 	/**
 	 * Counts the current query builder
 	 *
-	 * @param   string  $db 
+	 * @param   string  $db
 	 * @return  int
 	 */
 	public function count($db = NULL)
 	{
 		$db   = $this->_db($db);
 		$meta = $this->_meta;
-		
+
 		// Trigger callbacks
 		$meta AND $meta->events()->trigger('builder.before_select', $this);
-		
+
 		// Start with a basic SELECT
 		$query = $this->_build(Database::SELECT)->as_object(FALSE);
-		
+
 		// Dump a few unecessary bits that cause problems
 		$query->_select = $query->_order_by = array();
 
@@ -267,10 +267,10 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 		               ->select(array('COUNT("*")', 'total'))
 		               ->execute($db)
 		               ->get('total');
-		
+
 		// Trigger after_query callbacks
 		$meta AND $meta->events()->trigger('builder.after_select', $this);
-		
+
 		return $result;
 	}
 
@@ -283,7 +283,7 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 	public function execute($db = NULL, $type = NULL)
 	{
 		$type === NULL AND $type = $this->_type;
-		
+
 		switch ($type)
 		{
 			case Database::SELECT:
@@ -306,29 +306,29 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 	public function compile(Database $db, $type = NULL)
 	{
 		$type === NULL AND $type = $this->_type;
-		
+
 		// Select all of the columns for the model if we haven't already
 		$this->_meta AND empty($this->_select) AND $this->select_column('*');
-		
+
 		return $this->_build($type)->compile($db);
 	}
-	
+
 	/**
 	 * Selects for a specific key and limits the selection to 1 so that
 	 * a single model is returned.
 	 *
-	 * @param   mixed  $key 
-	 * @return  $this
+	 * @param   mixed  $key
+	 * @return  Jelly_Builder
 	 */
 	public function key($key)
 	{
 		return $this->where($this->_model.'.'.$this->unique_key($key), '=', $key)->limit(1);
 	}
-	
+
 	/**
 	 * Allows setting the type for dynamic execution
 	 *
-	 * @param   int  $type 
+	 * @param   int  $type
 	 * @return  mixed
 	 */
 	public function type($type = NULL)
@@ -338,15 +338,15 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 			$this->_type = $type;
 			return $this;
 		}
-		
+
 		return $this->_type;
 	}
-	
+
 	/**
 	 * Returns results as objects
 	 *
 	 * @param   string  classname or TRUE for stdClass
-	 * @return  $this
+	 * @return  Jelly_Builder
 	 */
 	public function as_object($class = TRUE, array $params = NULL)
 	{
@@ -355,10 +355,10 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 		{
 			$class = Jelly::class_name($this->_meta->model());
 		}
-		
+
 		return parent::as_object($class);
 	}
-	
+
 	/**
 	 * Returns the unique key for a specific value. This method is expected
 	 * to be overloaded in builders if the table has other unique columns.
@@ -370,11 +370,11 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 	{
 		return $this->_meta->primary_key();
 	}
-	
+
 	/**
-	 * Returns the meta object attached to this builder 
+	 * Returns the meta object attached to this builder
 	 * or NULL if nothing is attached.
-	 * 
+	 *
 	 * @return  Jelly_Meta
 	 */
 	public function meta()
@@ -388,7 +388,7 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 	 * @param   mixed   column name or array($column, $alias) or object
 	 * @param   string  logic operator
 	 * @param   mixed   column value
-	 * @return  $this
+	 * @return  Jelly_Builder
 	 */
 	public function and_where($column, $op, $value)
 	{
@@ -401,23 +401,23 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 	 * @param   mixed   column name or array($column, $alias) or object
 	 * @param   string  logic operator
 	 * @param   mixed   column value
-	 * @return  $this
+	 * @return  Jelly_Builder
 	 */
 	public function or_where($column, $op, $value)
 	{
 		return parent::or_where($this->_field_alias($column, $value), $op, $value);
 	}
-	
+
 	/**
-	 * Choose the fields(s) to select from. 
-	 * 
+	 * Choose the fields(s) to select from.
+	 *
 	 *     $query->select_column('column');
 	 *     $query->select_column('field', 'alias');
 	 *     $query->select_column(array('column', 'column2', '...'));
 	 *
 	 * @param   string|array  list of field names or actual columns
 	 * @param   string        An optional alias if passing a string for $columns
-	 * @return  $this
+	 * @return  Jelly_Builder
 	 */
 	public function select_column($columns, $alias = NULL)
 	{
@@ -429,10 +429,10 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 			{
 				$columns = array($columns, $alias);
 			}
-			
+
 			$columns = array($columns);
 		}
-		
+
 		foreach ($columns as $i => $column)
 		{
 			if (is_array($column))
@@ -490,7 +490,7 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 	 *
 	 * @param   mixed  table name or array($table, $alias) or object
 	 * @param   ...
-	 * @return  $this
+	 * @return  Jelly_Builder
 	 */
 	public function from($tables)
 	{
@@ -499,7 +499,7 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 		foreach ($tables as $i => $table)
 		{
 			$table = $this->_model_alias($table);
-			
+
 			parent::from($table);
 		}
 
@@ -511,7 +511,7 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 	 *
 	 * @param   mixed   column name or array($column, $alias) or object
 	 * @param   string  join type (LEFT, RIGHT, INNER, etc)
-	 * @return  $this
+	 * @return  Jelly_Builder
 	 */
 	public function join($table, $type = NULL)
 	{
@@ -524,7 +524,7 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 	 * @param   mixed   column name or array($column, $alias) or object
 	 * @param   string  logic operator
 	 * @param   mixed   column name or array($column, $alias) or object
-	 * @return  $this
+	 * @return  Jelly_Builder
 	 */
 	public function on($c1, $op, $c2)
 	{
@@ -536,7 +536,7 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 	 *
 	 * @param   mixed  column name or array($column, $alias) or object
 	 * @param   ...
-	 * @return  $this
+	 * @return  Jelly_Builder
 	 */
 	public function group_by($columns)
 	{
@@ -566,7 +566,7 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 	 * @param   mixed   column name or array($column, $alias) or object
 	 * @param   string  logic operator
 	 * @param   mixed   column value
-	 * @return  $this
+	 * @return  Jelly_Builder
 	 */
 	public function and_having($column, $op, $value = NULL)
 	{
@@ -579,7 +579,7 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 	 * @param   mixed   column name or array($column, $alias) or object
 	 * @param   string  logic operator
 	 * @param   mixed   column value
-	 * @return  $this
+	 * @return  Jelly_Builder
 	 */
 	public function or_having($column, $op, $value = NULL)
 	{
@@ -591,7 +591,7 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 	 *
 	 * @param   mixed   column name or array($column, $alias) or object
 	 * @param   string  direction of sorting
-	 * @return  $this
+	 * @return  Jelly_Builder
 	 */
 	public function order_by($column, $direction = NULL)
 	{
@@ -602,7 +602,7 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 	 * Set the values to update with an associative array.
 	 *
 	 * @param   array  associative (column => value) list
-	 * @return  $this
+	 * @return  Jelly_Builder
 	 */
 	public function set(array $pairs, $alias = TRUE)
 	{
@@ -619,7 +619,7 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 	 *
 	 * @param   mixed  table name or array($table, $alias) or object
 	 * @param   mixed  column value
-	 * @return  $this
+	 * @return  Jelly_Builder
 	 */
 	public function value($column, $value, $alias = TRUE)
 	{
@@ -637,7 +637,7 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 	 * Set the columns that will be inserted.
 	 *
 	 * @param   array  column names
-	 * @return  $this
+	 * @return  Jelly_Builder
 	 */
 	public function columns(array $columns, $alias = TRUE)
 	{
@@ -658,7 +658,7 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 	 * Sets values on an insert
 	 *
 	 * @param   array  $values
-	 * @return  $this
+	 * @return  Jelly_Builder
 	 */
 	public function values(array $values)
 	{
@@ -685,7 +685,7 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 	 * a failed query.
 	 *
 	 * @param   string  $alias
-	 * @return  $this
+	 * @return  Jelly_Builder
 	 */
 	public function with($relationship)
 	{
@@ -749,7 +749,7 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 	 *
 	 * The query type and model is not reset.
 	 *
-	 * @return  $this
+	 * @return  Jelly_Builder
 	 */
 	public function reset()
 	{
@@ -759,15 +759,15 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 		$this->_columns =
 		$this->_values  = array();
 		$this->_result = NULL;
-		
+
 		// Re-register the model
 		$this->_initialize();
 
 		return $this;
 	}
-	
+
 	/**
-	 * Initializes the builder by setting a default 
+	 * Initializes the builder by setting a default
 	 * table and adding the load_with joins.
 	 *
 	 * @return void
@@ -793,12 +793,12 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 			$this->from($this->_model);
 		}
 	}
-	
+
 	/**
 	 * Aliases a model to its actual table name. Returns an alias
 	 * suitable to pass to from() or join().
 	 *
-	 * @param  string $model 
+	 * @param  string $model
 	 * @return array
 	 */
 	protected function _model_alias($model)
@@ -806,7 +806,7 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 		$original = $table = $model;
 		$alias = NULL;
 		$found = NULL;
-		
+
 		// Split apart array(table, alias)
 		if (is_array($model))
 		{
@@ -814,16 +814,16 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 
 			$original = "$model.$alias";
 		}
-		
+
 		// Check to see if it's a known alias first
 		if (isset($this->_alias_cache[$model]))
 		{
 			return $this->_alias_cache[$model];
 		}
-	
+
 		// We're caching results to improve speed
 		if ( ! isset($this->_model_cache[$original]))
-		{	
+		{
 			// Standard model
 			if ($meta = Jelly::meta($model))
 			{
@@ -831,7 +831,7 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 				$alias = $alias ? $alias : $table;
 			}
 			// Joinable field was passed, use its model
-			else if (($pos = strpos($model, ':')) !== FALSE) 
+			else if (($pos = strpos($model, ':')) !== FALSE)
 			{
 				if ($pos !== 0)
 				{
@@ -842,37 +842,37 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 					$field = substr($model, 1);
 					$parent = $this->_model;
 				}
-				
+
 				$alias = $alias ? $alias : $parent.':'.$field;
 				$model = Jelly::meta($parent)->field($field)->foreign['model'];
 				$table = Jelly::meta($model)->table();
 			}
 			// Unknown Table
 			else
-			{	
+			{
 				$table = $model;
 				$model = NULL;
 				$alias = $alias ? $alias : $table;
 			}
-			
+
 			// Cache what we've found
 			$this->_model_cache[$original] = array($table, $alias, $model);
 			$this->_alias_cache[$alias]    = $this->_model_cache[$original];
 		}
-		
-		
-		
-		
-		
+
+
+
+
+
 		return $this->_model_cache[$original];
 	}
-	
+
 	/**
 	 * Aliases a field to its actual representation in the database. Meta-aliases
 	 * are resolved and table-aliases are taken into account.
-	 * 
+	 *
 	 * Note that the aliased field will be returned in the format you pass it in:
-	 * 
+	 *
 	 *    model.field => table.column
 	 *    field => column
 	 *
@@ -883,7 +883,7 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 	protected function _field_alias($field, $value = NULL, $join_if_sure = TRUE)
 	{
 		$original = $field;
-		
+
 		// Do nothing for Database Expressions and sub-queries
 		if ($field instanceof Database_Expression OR $field instanceof Database_Query)
 		{
@@ -892,13 +892,13 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 
 		// Alias the field(s) in FUNC("field")
 		if (strpos($field, '"') !== FALSE)
-		{	
+		{
 			return preg_replace('/"(.+?)"/e', '"\\"".$this->_field_alias("$1")."\\""', $field);
 		}
-		
+
 		// We always return fields as they came
 		$join = (boolean) strpos($field, '.');
-		
+
 		// Determine the default model
 		if ( ! $join)
 		{
@@ -906,15 +906,15 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 		}
 		else
 		{
-			list($model, $field) = explode('.', $field, 2);	
+			list($model, $field) = explode('.', $field, 2);
 		}
-		
+
 		// Have the column default to the field
 		$column = $field;
-		
+
 		// Alias the model
  		list(, $alias, $model) = $this->_model_alias($model);
-		
+
 		// Expand meta-aliases
 		if (strpos($field, ':') !== FALSE)
 		{
@@ -923,36 +923,36 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 				'field' => $field,
 				'value' => $value,
 			)));
-			
+
 			$column = $field;
 		}
-		
+
 		// Alias to the column
 		if ($meta = Jelly::meta($model) AND $field_obj = $meta->field($field) AND $field_obj->in_db)
 		{
 			$column = $field_obj->column;
-			
+
 			// We're 99% sure adding the table name in front won't cause problems now
 			$join = $join_if_sure ? TRUE : $join;
 		}
-		
+
 		return $join ? $alias.'.'.$column : $column;
 	}
-	
+
 	/**
 	 * Resolves meta-aliases.
 	 *
-	 * @param   string $alias 
-	 * @param   array  $state 
+	 * @param   string $alias
+	 * @param   array  $state
 	 * @return  array
 	 */
 	protected function _meta_alias($alias, $state)
 	{
 		$original = $alias;
-		
+
 		// The default model is the current field's model
 		$model = isset($state['model']) ? $state['model'] : $this->_model;
-		
+
 		// Check for a model operator
 		if (substr($alias, 0, 1) !== ':')
 		{
@@ -961,16 +961,16 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 			// Append the : back onto $field, it's key for recognizing the alias below
 			$alias = ':'.$alias;
 		}
-		
+
 		return $this->_expand_alias($model, $alias, $state);
 	}
-	
+
 	/**
 	 * Easy-to-override method that expands aliases.
 	 *
-	 * @param   string $model 
+	 * @param   string $model
 	 * @param   string $alias
-	 * @param   array $state 
+	 * @param   array $state
 	 * @return  array
 	 */
 	protected function _expand_alias($model, $alias, $state)
@@ -993,7 +993,7 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 				throw new Kohana_Exception('Unknown meta alias :alias', array(
 					':alias' => $alias));
 		}
-		
+
 		return $state;
 	}
 
@@ -1073,11 +1073,11 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 
 		return $query;
 	}
-	
+
 	/**
 	 * Returns a proper db group.
 	 *
-	 * @param   mixed  $db 
+	 * @param   mixed  $db
 	 * @return  void
 	 */
 	protected function _db($db)
@@ -1087,7 +1087,7 @@ abstract class Jelly_Core_Builder extends Kohana_Database_Query_Builder_Select
 		{
 			return $this->_meta ? $this->_meta->db() : 'default';
 		}
-		
+
 		return $db;
 	}
 }
